@@ -78,8 +78,7 @@
     
   
     ret = [numberFormatter stringFromNumber:[NSNumber numberWithFloat:inValue]];
-    [numberFormatter release];
-    return ret;
+     return ret;
 
 }
 @end

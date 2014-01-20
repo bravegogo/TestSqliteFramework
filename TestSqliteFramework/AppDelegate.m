@@ -7,7 +7,7 @@
 //
 
 #import "AppDelegate.h"
-
+#import "Car.h"
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -16,6 +16,18 @@
     // Override point for customization after application launch.
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
+    
+    
+    
+    Car * car = [[Car alloc]init];
+    
+    NSLog(@"*********** %@",[Car tableName]);
+    [Car tableCheck];
+    
+    NSLog(@"*********** %@",[Car tableName]);
+
+    
+    
     return YES;
 }
 

@@ -38,6 +38,8 @@
 		395588DB188D763C006CE09E /* UIImage-SQLitePersistence.m in Sources */ = {isa = PBXBuildFile; fileRef = 395588D4188D763C006CE09E /* UIImage-SQLitePersistence.m */; };
 		395588E0188D76DB006CE09E /* NSObject-MissingKV.m in Sources */ = {isa = PBXBuildFile; fileRef = 395588DD188D76DB006CE09E /* NSObject-MissingKV.m */; };
 		395588E1188D76DB006CE09E /* NSString-NumberStuff.m in Sources */ = {isa = PBXBuildFile; fileRef = 395588DF188D76DB006CE09E /* NSString-NumberStuff.m */; };
+		395588E5188D7A51006CE09E /* Car.m in Sources */ = {isa = PBXBuildFile; fileRef = 395588E4188D7A51006CE09E /* Car.m */; };
+		395588E8188D7E57006CE09E /* NSString-SQLitePersistence.m in Sources */ = {isa = PBXBuildFile; fileRef = 395588E7188D7E57006CE09E /* NSString-SQLitePersistence.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -104,6 +106,10 @@
 		395588DD188D76DB006CE09E /* NSObject-MissingKV.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject-MissingKV.m"; sourceTree = "<group>"; };
 		395588DE188D76DB006CE09E /* NSString-NumberStuff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString-NumberStuff.h"; sourceTree = "<group>"; };
 		395588DF188D76DB006CE09E /* NSString-NumberStuff.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString-NumberStuff.m"; sourceTree = "<group>"; };
+		395588E3188D7A51006CE09E /* Car.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Car.h; sourceTree = "<group>"; };
+		395588E4188D7A51006CE09E /* Car.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Car.m; sourceTree = "<group>"; };
+		395588E6188D7E57006CE09E /* NSString-SQLitePersistence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString-SQLitePersistence.h"; sourceTree = "<group>"; };
+		395588E7188D7E57006CE09E /* NSString-SQLitePersistence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString-SQLitePersistence.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,6 +140,9 @@
 		3955885E188BFE2A006CE09E = {
 			isa = PBXGroup;
 			children = (
+				395588E6188D7E57006CE09E /* NSString-SQLitePersistence.h */,
+				395588E7188D7E57006CE09E /* NSString-SQLitePersistence.m */,
+				395588E2188D79F2006CE09E /* TestCase */,
 				395588DC188D76DB006CE09E /* NSObject-MissingKV.h */,
 				395588DD188D76DB006CE09E /* NSObject-MissingKV.m */,
 				395588DE188D76DB006CE09E /* NSString-NumberStuff.h */,
@@ -244,6 +253,15 @@
 				395588AA188C0747006CE09E /* FMResultSet.m */,
 			);
 			path = FMDatabase;
+			sourceTree = "<group>";
+		};
+		395588E2188D79F2006CE09E /* TestCase */ = {
+			isa = PBXGroup;
+			children = (
+				395588E3188D7A51006CE09E /* Car.h */,
+				395588E4188D7A51006CE09E /* Car.m */,
+			);
+			path = TestCase;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -358,7 +376,9 @@
 				395588D5188D763C006CE09E /* NSData-SQLitePersistence.m in Sources */,
 				3955889B188BFE92006CE09E /* DatabasePersistentObject.m in Sources */,
 				395588AC188C0747006CE09E /* FMDatabaseAdditions.m in Sources */,
+				395588E8188D7E57006CE09E /* NSString-SQLitePersistence.m in Sources */,
 				395588D8188D763C006CE09E /* NSMutableData-SQLitePersistence.m in Sources */,
+				395588E5188D7A51006CE09E /* Car.m in Sources */,
 				395588B5188C136D006CE09E /* DatabaseInstanceManager.m in Sources */,
 				395588D6188D763C006CE09E /* NSDate-SQLitePersistence.m in Sources */,
 			);

@@ -1,5 +1,5 @@
 //
-//  NSObject-SQLitePersistence.m
+//  NSString-SQLitePersistence.h
 // ----------------------------------------------------------------------
 // Part of the SQLite Persistent Objects for Cocoa and Cocoa Touch
 //
@@ -18,42 +18,29 @@
 // included Readme.txt file
 // ----------------------------------------------------------------------
 
+#import <Foundation/Foundation.h>
 #import "NSObject-SQLitePersistence.h"
-#import "NSObject+ClassName.h"
 
+@interface NSString(SQLitePersistence) <SQLitePersistence>
+/*!
+ This method initializes an NSString from TEXT colum data pulled from the database.
+ */
++ (id)objectWithSqlColumnRepresentation:(NSString *)columnData;
 
-@implementation NSObject(SQLitePersistence)
+/*!
+ This method returns self.
+ */
+- (NSString *)sqlColumnRepresentationOfSelf;
 
+/*!
+ Returns YES to indicate it can be stored in a column of a database
+ */
 + (BOOL)canBeStoredInSQLite;
-{
-  return [self conformsToProtocol:@protocol(NSCoding)];
-}
-+ (NSString *)columnTypeForObjectStorage 
-{
-  return kSQLiteColumnTypeBlob;
-}
-- (NSData *)sqlBlobRepresentationOfSelf
-{
-  NSMutableData *data = [[NSMutableData alloc] init];
-  NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:data];
-  [archiver encodeObject:self forKey:[self className]];
-  [archiver finishEncoding];
- 
-  return  data  ;
-}
-+ (BOOL)shouldBeStoredInBlob
-{
-  return YES;
-}
-+ (id)objectWithSQLBlobRepresentation:(NSData *)data;
-{
-  if (data == nil || [data length] == 0)
-    return nil;
-  
-  NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:data];
-  id ret = [unarchiver decodeObjectForKey:[self className]];
-  [unarchiver finishDecoding];
- 
-  return ret;
-}
+
+/*!
+ Returns TEXT to inidicate this object can be stored in a TEXT column
+ */
++ (NSString *)columnTypeForObjectStorage;
+
++ (BOOL)shouldBeStoredInBlob;
 @end

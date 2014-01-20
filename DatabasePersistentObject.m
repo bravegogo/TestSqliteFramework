@@ -203,9 +203,37 @@ NSMutableArray *checkedTables;
             else if ([propType hasPrefix:@"@"] ) // Object
             {
             NSString *className = [propType substringWithRange:NSMakeRange(2, [propType length]-3)];
+                if (isNSArrayType(className))
+                {
+                    
+                }
+                else if (isNSDictionaryType(className))
+                {
+                    
+                }
+                else if (isNSSetType(className))
+                {
+                    
+                }
+                else
+                {
+                    Class propClass = objc_lookUpClass([className UTF8String]);
+                    
+                    if ([propClass isSubclassOfClass:[DatabasePersistentObject class]])
+                    {
+                        // Store persistent objects as quasi foreign-key reference. We don't use
+                        // datbase's referential integrity tools, but rather use the memory map
+                        // key to store the table and fk in a single text field
+                        [createSQL appendFormat:@", %@ TEXT", propName];
+                    }
+                    else if ([propClass canBeStoredInSQLite])
+                    {
+                        [createSQL appendFormat:@", %@ %@", propName, [propClass columnTypeForObjectStorage]];
+                    }
+                }
                 
             }
-         
+  
         }
         [createSQL appendString:@")"];
         NSLog(@"**********************  %@",createSQL);
@@ -220,12 +248,8 @@ NSMutableArray *checkedTables;
            
             NSMutableString *addSequenceSQL = [NSMutableString stringWithFormat:@"INSERT OR IGNORE INTO SQLITESEQUENCE (name,seq) VALUES ('%@', 0)", [[self class] tableName]];
              [database executeUpdate:addSequenceSQL];
-//            [database close];
         }
-
-        
-//
-        
+   
         NSArray *theIndices = [self indices];
         if (theIndices != nil)
         {

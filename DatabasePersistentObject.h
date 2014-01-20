@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-
+#import "DatabaseInstanceManager.h"
 
 
 
@@ -30,5 +30,8 @@
 
 @property(nonatomic,strong)FMDatabase * db;
 + (NSString *)tableName;
++ (FMDatabase *)database;
++ (DatabaseInstanceManager *)manager;
++(void)tableCheck;
 
 @end
