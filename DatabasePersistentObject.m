@@ -166,7 +166,7 @@ NSMutableArray *checkedTables;
         // Do not use static variables to cache information in this method, as it will be
         // shared across subclasses. Do caching in instance methods.
 //        FMDatabase *database = [self database];
-        NSMutableString *createSQL = [NSMutableString stringWithFormat:@"CREATE TABLE IF NOT EXISTS %@ (pk INTEGER PRIMARY KEY",[self tableName]];
+        NSMutableString *createSQL = [NSMutableString stringWithFormat:@"CREATE TABLE IF NOT EXISTS %@ (pk INTEGER PRIMARY KEY AUTOINCREMENT",[self tableName]];
         
         NSDictionary* props = [[self class] propertiesWithEncodedTypes];
         for (NSString *oneProp in props)
@@ -419,6 +419,7 @@ NSMutableArray *checkedTables;
     
         FMDatabase *database = [[self class] database];
         [database open];
+        [database beginTransaction];
         // If this object is new, we need to figure out the correct primary key value,
         // which will be one higher than the current highest pk value in the table.
         
@@ -430,14 +431,14 @@ NSMutableArray *checkedTables;
               while ([rs next]){
                  pk =  [rs intForColumn:@"seq"] +1;
               }
-             NSString *seqIncrementQuery = [NSString stringWithFormat:@"UPDATE SQLITESEQUENCE set seq=%d WHERE name='%@'", pk, [[self class] tableName]];
-            [database executeUpdate:seqIncrementQuery];
+              NSString *seqIncrementQuery = [NSString stringWithFormat:@"UPDATE SQLITESEQUENCE set seq=%d WHERE name='%@'", pk, [[self class] tableName]];
+              [database executeUpdate:seqIncrementQuery];
         }
     
-        NSMutableString *updateSQL = [NSMutableString stringWithFormat:@"INSERT OR REPLACE INTO %@ (pk", [[self class] tableName]];
+        NSMutableString *updateSQL = [NSMutableString stringWithFormat:@"INSERT OR REPLACE INTO %@ (", [[self class] tableName]];
         
         NSMutableString *bindSQL = [NSMutableString string];
-        
+    int index = 0;
         for (NSString *propName in props)
         {
             if ([theTransients containsObject:propName]) continue;
@@ -448,12 +449,19 @@ NSMutableArray *checkedTables;
                 className = [propType substringWithRange:NSMakeRange(2, [propType length]-3)];
             if (! (isCollectionType(className)))
             {
+              if (0 == index){
+                   [updateSQL appendFormat:@"%@", [propName stringAsSQLColumnName]];
+                   [bindSQL appendString:@"?"];
+               }else{
                 [updateSQL appendFormat:@", %@", [propName stringAsSQLColumnName]];
                 [bindSQL appendString:@", ?"];
+               }
             }
+            
+            index ++;
         }
         
-        [updateSQL appendFormat:@") VALUES (?%@)", bindSQL];
+        [updateSQL appendFormat:@") VALUES (%@)", bindSQL];
     
         NSLog(@" updateSQL*********  %@",updateSQL);
         NSMutableString * valueSQL = [NSMutableString string];
@@ -518,15 +526,12 @@ NSMutableArray *checkedTables;
                         } else if([[theProperty class] shouldBeStoredInBlob]) {
                             NSData *data = [theProperty sqlBlobRepresentationOfSelf];
                             [valueArray addObject:data];
-
                         } else {
-                          
                             id theValue = [theProperty sqlColumnRepresentationOfSelf];
                             [valueSQL appendFormat:@", %@", theValue];
-                            NSLog(@" theString*********  %@",theValue);
+                             NSLog(@" theString*********  %@",theValue);
                             [valueArray addObject:theValue];
                             
-
                         }
                     }
                     
@@ -534,10 +539,10 @@ NSMutableArray *checkedTables;
 
             }// for
     
-    NSLog(@" *********  %@ - %@",updateSQL,valueSQL);
-    
-     BOOL ret = [database executeUpdate:updateSQL withArgumentsInArray:valueArray];
+      NSLog(@" *********  %@ - %@",updateSQL,valueSQL);
+      BOOL ret = [database executeUpdate:updateSQL withArgumentsInArray:valueArray];
       NSLog(@" *********  %d - %d",ret,ret);
-    [database close];
+     [database commit];
+     [database close];
 }
 @end
