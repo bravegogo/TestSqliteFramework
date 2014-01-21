@@ -26,12 +26,17 @@
     BOOL    dirty;
     BOOL    alreadySaving;
     BOOL    alreadyDeleting;
+//    FMDatabase * db;
 }
 
-@property(nonatomic,strong)FMDatabase * db;
+//@property(nonatomic,strong)FMDatabase * db;
+
 + (NSString *)tableName;
 + (FMDatabase *)database;
 + (DatabaseInstanceManager *)manager;
 +(void)tableCheck;
+
+
+-(void)save;
 
 @end

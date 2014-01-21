@@ -20,14 +20,21 @@
     
     
     Car * car = [[Car alloc]init];
+    car.wheel = @"09099090";
+    car.koil = @"0920938328923893289";
+    car.mmm = 1000;
+    [car valueForKey:@"wheel"];
     
-    NSLog(@"*********** %@",[Car tableName]);
-    [Car tableCheck];
+    NSLog(@"*********** %@", [car valueForKey:@"wheel"]);
+    NSLog(@"*********** %@", [car valueForKey:@"koil"]);
+    NSLog(@"*********** %@", [car valueForKey:@"mmm"]);
+//    [Car tableCheck];
     
-    NSLog(@"*********** %@",[Car tableName]);
+//    NSLog(@"*********** %@",[Car tableName]);
 
+    [car save];
     
-    
+     NSLog(@"*********** end ***************");
     return YES;
 }
 

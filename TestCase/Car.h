@@ -15,4 +15,6 @@
 //@property(nonatomic,strong) NSString * sudu;
 @property(nonatomic,strong) NSString * koil;
 @property(nonatomic,assign) int  mmm;
+
+
 @end

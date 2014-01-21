@@ -7,8 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
+@protocol DataPersistence ;
 
-@interface NSString (DataPersistence)
+@interface NSString (DataPersistence)<DataPersistence>
 /*!
  This method initializes an NSString from TEXT colum data pulled from the database.
  */

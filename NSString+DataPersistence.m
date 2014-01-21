@@ -7,6 +7,8 @@
 //
 
 #import "NSString+DataPersistence.h"
+#import "PersistenceConfig.h"
+#import "DataPersistence.h"
 
 @implementation NSString (DataPersistence)
 
