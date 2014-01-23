@@ -369,76 +369,158 @@ NSMutableArray *checkedTables;
     
 }
 
--(void)save
+
+-(void)deleteOp
+{
+    if (alreadyDeleting)
+        return;
+    alreadyDeleting = YES;
+     [[self class] tableCheck];
+    NSDictionary *props = [[self class] propertiesWithEncodedTypes];
+ 
+    FMDatabase *database = [[self class] database];
+    [database open];
+    [database beginTransaction];
+    
+    NSMutableString *deleteQuery = [NSMutableString stringWithFormat:@"DELETE FROM %@ WHERE ", [[self class] tableName]];
+    
+    NSMutableString *bindSQL = [NSMutableString string];
+    int index = 0;
+    for (NSString *propName in props)
+    {
+
+        NSString *propType = [props objectForKey:propName];
+        NSString *className = @"";
+        if ([propType hasPrefix:@"@"])
+            className = [propType substringWithRange:NSMakeRange(2, [propType length]-3)];
+        if (! (isCollectionType(className)))
+        {
+            if (0 == index){
+                [deleteQuery appendFormat:@" %@ = ?" , [propName stringAsSQLColumnName]];
+            }else{
+                [deleteQuery appendFormat:@" and %@ = ? ", [propName stringAsSQLColumnName]];
+            }
+        }
+        
+        index ++;
+    }
+   
+    NSMutableString * valueSQL = [NSMutableString string];
+    NSMutableArray * valueArray = [NSMutableArray array];
+    id theValue;
+    for (NSString *propName in props)
+    {
+        NSString *propType = [props objectForKey:propName];
+        NSString *className = propType;
+        if ([propType hasPrefix:@"@"]){
+            className = [propType substringWithRange:NSMakeRange(2, [propType length]-3)];
+        }
+        
+        id theProperty = [self valueForKey:propName];
+        if (theProperty == nil && ! (isCollectionType(className)))
+        {
+            
+            NSString *theString = [theProperty stringValue];
+            [valueSQL appendFormat:@", %@", theString];
+            NSLog(@" theString*********  %@",theString);
+            theValue = [theProperty stringValue];
+            [valueArray addObject:theString];
+
+            
+        }else if([propType isEqualToString:@"i"] || // int
+                 [propType isEqualToString:@"I"] || // unsigned int
+                 [propType isEqualToString:@"l"] || // long
+                 [propType isEqualToString:@"L"] || // usigned long
+                 [propType isEqualToString:@"q"] || // long long
+                 [propType isEqualToString:@"Q"] || // unsigned long long
+                 [propType isEqualToString:@"s"] || // short
+                 [propType isEqualToString:@"S"] || // unsigned short
+                 [propType isEqualToString:@"B"] || // bool or _Bool
+                 [propType isEqualToString:@"f"] || // float
+                 [propType isEqualToString:@"d"] )  // double
+        {
+            
+            [valueSQL appendFormat:@", %@", [theProperty stringValue]];
+            NSLog(@" theString*********  %@",[theProperty stringValue]);
+            [valueArray addObject:[theProperty stringValue]];
+              theValue = [theProperty stringValue];
+
+        }
+        else if ([propType isEqualToString:@"c"] || // char
+                 [propType isEqualToString:@"C"] ) // unsigned char
+        {
+            NSString *theString = [theProperty stringValue];
+            [valueSQL appendFormat:@", %@", theString];
+            NSLog(@" theString*********  %@",theString);
+            [valueArray addObject:[theProperty stringValue]];
+
+        }
+        else if ([propType hasPrefix:@"@"] ) // Object
+        {
+            NSString *className = [propType substringWithRange:NSMakeRange(2, [propType length]-3)];
+            
+            if (! (isCollectionType(className)) )
+            {
+                if ([[theProperty class] isSubclassOfClass:[DatabasePersistentObject class]])
+                {
+                    //
+                } else if([[theProperty class] shouldBeStoredInBlob]) {
+                    NSData *data = [theProperty sqlBlobRepresentationOfSelf];
+                    [valueArray addObject:data];
+                } else {
+                    id theValue = [theProperty sqlColumnRepresentationOfSelf];
+                    [valueSQL appendFormat:@", %@", theValue];
+                    NSLog(@" theString*********  %@",theValue);
+                    [valueArray addObject:theValue];
+
+                }
+                
+            }
+        }
+  
+          index ++;
+    }// for
+ 
+       NSLog(@" del *********  %@ - %@",deleteQuery,valueSQL);
+       BOOL ret = [database executeUpdate:deleteQuery withArgumentsInArray:valueArray];
+        NSLog(@" del *********  %d - %d",ret,ret);
+    [database commit];
+    [database close];
+    
+     alreadyDeleting = NO;
+}
+
+
+-(void)saveOp
 {
     if (alreadySaving)
         return;
     alreadySaving = YES;
-    
     [[self class] tableCheck];
-    
-//    if (pk == 0)
-//    {
-//        NSLog(@"Object of type '%@' seems to be uninitialised, perhaps init does not call super init.", [[self class] description] );
-//        return;
-//    }
-    
+ 
     NSDictionary *props = [[self class] propertiesWithEncodedTypes];
-    
-////    if (!dirty)
-////    {
-//        // Check child and owned objects to see if any of them are dirty
-//        // Just tell children and composed objects to save themselves
-//        
-//        for (NSString *propName in props)
-//        {
-//            NSString *propType = [props objectForKey:propName];
-//            //int colIndex = sqlite3_bind_parameter_index(stmt, [[propName stringAsSQLColumnName] UTF8String]);
-//            id theProperty = [self valueForKey:propName];
-//            if ([propType hasPrefix:@"@"] ) // Object
-//            {
-//                NSString *className = [propType substringWithRange:NSMakeRange(2, [propType length]-3)];
-//                
-//                
-//                if (! (isCollectionType(className)) )
-//                {
-////                    if ([[theProperty class] isSubclassOfClass:[DatabasePersistentObject class]])
-////                        if ([theProperty isDirty])
-////                            dirty = YES;
-//                }
-// 
-//            }
-//        }
-////    }
-    
     NSArray *theTransients = [[self class] transients];
-    
-//    if (dirty)
-//    {
-//        dirty = NO;
-    
-        FMDatabase *database = [[self class] database];
-        [database open];
-        [database beginTransaction];
-        // If this object is new, we need to figure out the correct primary key value,
-        // which will be one higher than the current highest pk value in the table.
-        
-        if (pk < 0)
-        {
-              NSString *pkQuery = [NSString stringWithFormat:@"SELECT SEQ FROM SQLITESEQUENCE WHERE NAME='%@'", [[self class] tableName]];
-            
-              FMResultSet * rs = [database executeQuery:pkQuery];
-              while ([rs next]){
-                 pk =  [rs intForColumn:@"seq"] +1;
-              }
-              NSString *seqIncrementQuery = [NSString stringWithFormat:@"UPDATE SQLITESEQUENCE set seq=%d WHERE name='%@'", pk, [[self class] tableName]];
-              [database executeUpdate:seqIncrementQuery];
-        }
+ 
+    FMDatabase *database = [[self class] database];
+    [database open];
+    [database beginTransaction];
+ 
+//        if (pk < 0)
+//        {
+//              NSString *pkQuery = [NSString stringWithFormat:@"SELECT SEQ FROM SQLITESEQUENCE WHERE NAME='%@'", [[self class] tableName]];
+//            
+//              FMResultSet * rs = [database executeQuery:pkQuery];
+//              while ([rs next]){
+//                 pk =  [rs intForColumn:@"seq"] +1;
+//              }
+//              NSString *seqIncrementQuery = [NSString stringWithFormat:@"UPDATE SQLITESEQUENCE set seq=%d WHERE name='%@'", pk, [[self class] tableName]];
+//              [database executeUpdate:seqIncrementQuery];
+//        }
     
         NSMutableString *updateSQL = [NSMutableString stringWithFormat:@"INSERT OR REPLACE INTO %@ (", [[self class] tableName]];
         
         NSMutableString *bindSQL = [NSMutableString string];
-    int index = 0;
+        int index = 0;
         for (NSString *propName in props)
         {
             if ([theTransients containsObject:propName]) continue;
@@ -482,9 +564,9 @@ NSMutableArray *checkedTables;
                 if (theProperty == nil && ! (isCollectionType(className)))
                 {
  
-                  NSString *theString = [theProperty stringValue];
-                  [valueSQL appendFormat:@", %@", theString];
-                  NSLog(@" theString*********  %@",theString);
+                    NSString *theString = [theProperty stringValue];
+                    [valueSQL appendFormat:@", %@", theString];
+                    NSLog(@" theString*********  %@",theString);
                     [valueArray addObject:theString];
                 }else if([propType isEqualToString:@"i"] || // int
                          [propType isEqualToString:@"I"] || // unsigned int
@@ -506,13 +588,11 @@ NSMutableArray *checkedTables;
                 }
                 else if ([propType isEqualToString:@"c"] || // char
                          [propType isEqualToString:@"C"] ) // unsigned char
-                    
                 {
                      NSString *theString = [theProperty stringValue];
                      [valueSQL appendFormat:@", %@", theString];
                      NSLog(@" theString*********  %@",theString);
                     [valueArray addObject:[theProperty stringValue]];
-         
                 }
                 else if ([propType hasPrefix:@"@"] ) // Object
                 {
@@ -531,10 +611,8 @@ NSMutableArray *checkedTables;
                             [valueSQL appendFormat:@", %@", theValue];
                              NSLog(@" theString*********  %@",theValue);
                             [valueArray addObject:theValue];
-                            
                         }
                     }
-                    
                 }
 
             }// for
@@ -544,5 +622,7 @@ NSMutableArray *checkedTables;
       NSLog(@" *********  %d - %d",ret,ret);
      [database commit];
      [database close];
+    
+     alreadySaving = NO;
 }
 @end

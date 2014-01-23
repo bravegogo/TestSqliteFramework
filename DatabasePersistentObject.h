@@ -37,6 +37,6 @@
 +(void)tableCheck;
 
 
--(void)save;
-
+-(void)saveOp;
+-(void)deleteOp;
 @end

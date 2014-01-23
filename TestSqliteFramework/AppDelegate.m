@@ -21,7 +21,7 @@
     
     Car * car = [[Car alloc]init];
     car.wheel = @"09099090";
-    car.koil = @"0920938328923893289";
+    car.koil = @"-09082736";
     car.mmm = 1000;
     [car valueForKey:@"wheel"];
     
@@ -32,8 +32,10 @@
     
 //    NSLog(@"*********** %@",[Car tableName]);
 
-    [car save];
-    
+    [car saveOp];
+    [car saveOp];
+    [car saveOp];
+    [car deleteOp];
      NSLog(@"*********** end ***************");
     return YES;
 }
