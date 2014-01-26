@@ -40,6 +40,7 @@
 		395588E1188D76DB006CE09E /* NSString-NumberStuff.m in Sources */ = {isa = PBXBuildFile; fileRef = 395588DF188D76DB006CE09E /* NSString-NumberStuff.m */; };
 		395588E5188D7A51006CE09E /* Car.m in Sources */ = {isa = PBXBuildFile; fileRef = 395588E4188D7A51006CE09E /* Car.m */; };
 		395588E8188D7E57006CE09E /* NSString-SQLitePersistence.m in Sources */ = {isa = PBXBuildFile; fileRef = 395588E7188D7E57006CE09E /* NSString-SQLitePersistence.m */; };
+		395712EB1895681000D31FA2 /* home.m in Sources */ = {isa = PBXBuildFile; fileRef = 395712EA1895681000D31FA2 /* home.m */; };
 		3965EF52188E42D80077AEE3 /* NSString+DataPersistence.m in Sources */ = {isa = PBXBuildFile; fileRef = 3965EF51188E42D80077AEE3 /* NSString+DataPersistence.m */; };
 /* End PBXBuildFile section */
 
@@ -111,6 +112,8 @@
 		395588E4188D7A51006CE09E /* Car.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Car.m; sourceTree = "<group>"; };
 		395588E6188D7E57006CE09E /* NSString-SQLitePersistence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString-SQLitePersistence.h"; sourceTree = "<group>"; };
 		395588E7188D7E57006CE09E /* NSString-SQLitePersistence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString-SQLitePersistence.m"; sourceTree = "<group>"; };
+		395712E91895681000D31FA2 /* home.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = home.h; sourceTree = "<group>"; };
+		395712EA1895681000D31FA2 /* home.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = home.m; sourceTree = "<group>"; };
 		3965EF50188E42D80077AEE3 /* NSString+DataPersistence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+DataPersistence.h"; sourceTree = "<group>"; };
 		3965EF51188E42D80077AEE3 /* NSString+DataPersistence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+DataPersistence.m"; sourceTree = "<group>"; };
 		3965EF53188E43B20077AEE3 /* DataPersistence.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DataPersistence.h; sourceTree = "<group>"; };
@@ -269,6 +272,8 @@
 			children = (
 				395588E3188D7A51006CE09E /* Car.h */,
 				395588E4188D7A51006CE09E /* Car.m */,
+				395712E91895681000D31FA2 /* home.h */,
+				395712EA1895681000D31FA2 /* home.m */,
 			);
 			path = TestCase;
 			sourceTree = "<group>";
@@ -378,6 +383,7 @@
 				395588D9188D763C006CE09E /* NSNumber-SQLitePersistence.m in Sources */,
 				395588E1188D76DB006CE09E /* NSString-NumberStuff.m in Sources */,
 				39558877188BFE2A006CE09E /* main.m in Sources */,
+				395712EB1895681000D31FA2 /* home.m in Sources */,
 				395588AB188C0747006CE09E /* FMDatabase.m in Sources */,
 				395588AD188C0747006CE09E /* FMDatabasePool.m in Sources */,
 				395588DB188D763C006CE09E /* UIImage-SQLitePersistence.m in Sources */,

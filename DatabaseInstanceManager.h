@@ -7,14 +7,18 @@
 //
 
 #import <Foundation/Foundation.h>
-@class FMDatabase;
+
+
+@class FMDatabase,FMDatabaseQueue;
 
 @interface DatabaseInstanceManager : NSObject
 
 @property(nonatomic,strong)NSString *databaseName;
+@property (nonatomic, retain)FMDatabaseQueue *dbQueue;
 
 +(id)shareInstanceManager;
 - (FMDatabase *) getDatabase;
+- (FMDatabaseQueue *) getDatabaseQueue;
 - (NSString *) getSqliteFilePath ;
 - (void) deleteDatabase;
 - (NSString *) getTheDatabaseName;

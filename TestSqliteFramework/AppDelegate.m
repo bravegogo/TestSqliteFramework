@@ -8,6 +8,8 @@
 
 #import "AppDelegate.h"
 #import "Car.h"
+#import "home.h"
+
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -36,6 +38,15 @@
     [car saveOp];
     [car saveOp];
     [car deleteOp];
+    
+    home * car890 = [[home alloc]init];
+    car890.wheel = @"09099090";
+    car890.koil = @"-09082736";
+    car890.mmm = 10000009;
+    [car890 saveOp];
+    NSLog(@"*********** %@",[home tableName]);
+
+//    [car890 valueForKey:@"wheel"];
      NSLog(@"*********** end ***************");
     return YES;
 }

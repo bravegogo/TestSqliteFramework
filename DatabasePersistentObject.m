@@ -9,6 +9,7 @@
 #import "DatabasePersistentObject.h"
 #import "NSObject+ClassName.h"
 #import "FMDatabase.h"
+#import "FMDatabaseQueue.h"
 #import "DatabaseInstanceManager.h"
 #import <objc/objc-class.h>
 #import "NSString+ColumnName.h"
@@ -29,8 +30,7 @@ NSMutableArray *checkedTables;
 -(id)init{
     self = [super init];
     if (self) {
-//        DatabaseInstanceManager * instanceManager = [DatabaseInstanceManager shareInstanceManager];
-//         db = [instanceManager getDatabase];
+ 
     }
     return self;
 }
@@ -148,14 +148,23 @@ NSMutableArray *checkedTables;
     return [[DatabaseInstanceManager shareInstanceManager] getDatabase];
 }
 
++ (FMDatabaseQueue *)databaseQueue
+{
+    return [[DatabaseInstanceManager shareInstanceManager] getDatabaseQueue];
+}
+
 + (DatabaseInstanceManager *)manager
 {
     return [DatabaseInstanceManager shareInstanceManager];
 }
+
+#pragma mark -- 创建表
 +(void)tableCheck
 {
     NSArray *theTransients = [[self class] transients];
-    FMDatabase *database = [self database];
+//    FMDatabase *database = [self database];
+    FMDatabaseQueue * theDatabaseQueue  = [[self class] databaseQueue];
+    
     if (checkedTables == nil)
         checkedTables = [[NSMutableArray alloc] init];
     
@@ -238,18 +247,31 @@ NSMutableArray *checkedTables;
         [createSQL appendString:@")"];
         NSLog(@"**********************  %@",createSQL);
         
-        if (![database open])
-        {
-            NSLog(@"OPEN FAIL");
-        }else {
-            [database executeUpdate:createSQL];
-            
-            [database executeUpdate:@"CREATE TABLE IF NOT EXISTS SQLITESEQUENCE (name TEXT PRIMARY KEY, seq INTEGER)" ];
-           
-            NSMutableString *addSequenceSQL = [NSMutableString stringWithFormat:@"INSERT OR IGNORE INTO SQLITESEQUENCE (name,seq) VALUES ('%@', 0)", [[self class] tableName]];
-             [database executeUpdate:addSequenceSQL];
-        }
+//        if (![database open])
+//        {
+//            NSLog(@"OPEN FAIL");
+//        }else {
+//            [database executeUpdate:createSQL];
+//            
+//            [database executeUpdate:@"CREATE TABLE IF NOT EXISTS SQLITESEQUENCE (name TEXT PRIMARY KEY, seq INTEGER)" ];
+//           
+//            NSMutableString *addSequenceSQL = [NSMutableString stringWithFormat:@"INSERT OR IGNORE INTO SQLITESEQUENCE (name,seq) VALUES ('%@', 0)", [[self class] tableName]];
+//             [database executeUpdate:addSequenceSQL];
+//        }
    
+        [theDatabaseQueue inTransaction:^(FMDatabase *db, BOOL *rollback) {
+           
+            if (*rollback == YES) {
+                NSLog(@"******* rollback as : %@", [db lastErrorMessage]);
+            }
+
+                [db executeUpdate:createSQL];
+                [db executeUpdate:@"CREATE TABLE IF NOT EXISTS SQLITESEQUENCE (name TEXT PRIMARY KEY, seq INTEGER)" ];
+                NSMutableString *addSequenceSQL = [NSMutableString stringWithFormat:@"INSERT OR IGNORE INTO SQLITESEQUENCE (name,seq) VALUES ('%@', 0)", [[self class] tableName]];
+                [db executeUpdate:addSequenceSQL];
+            
+        }];
+        
         NSArray *theIndices = [self indices];
         if (theIndices != nil)
         {
@@ -272,8 +294,14 @@ NSMutableArray *checkedTables;
                     }
                     NSString *indexQuery = [NSString stringWithFormat:@"create index if not exists %@ on %@ (%@)", indexName, [self tableName], fieldCondition];
                     
-                    [database executeQuery:indexQuery];
- 
+//                    [database executeQuery:indexQuery];
+                    [theDatabaseQueue inTransaction:^(FMDatabase *db, BOOL *rollback) {
+                        if (*rollback == YES) {
+                            NSLog(@"******* rollback as : %@", [db lastErrorMessage]);
+                        }
+                        [db executeQuery:indexQuery];
+                    }];
+
                 }
             }
         }
@@ -305,8 +333,10 @@ NSMutableArray *checkedTables;
                             colType = [propClass columnTypeForObjectStorage];
                         
 //                        [[self manager] executeUpdateSQL:[NSString stringWithFormat:@"alter table %@ add column %@ %@", [self tableName], propName, colType]];
-                        
-                        [database executeUpdate:[NSString stringWithFormat:@"alter table %@ add column %@ %@", [self tableName], propName, colType]];
+                         [theDatabaseQueue inTransaction:^(FMDatabase *db, BOOL *rollback) {
+                               [db executeUpdate:[NSString stringWithFormat:@"alter table %@ add column %@ %@", [self tableName], propName, colType]];
+                         }];
+//                        [database executeUpdate:[NSString stringWithFormat:@"alter table %@ add column %@ %@", [self tableName], propName, colType]];
                     }
                 }
                 else
@@ -332,14 +362,21 @@ NSMutableArray *checkedTables;
                     
 //                    [[self manager] executeUpdateSQL:[NSString stringWithFormat:@"alter table %@ add column %@ %@", [self tableName], propName, colType]];
                     
-                     [database executeUpdate:[NSString stringWithFormat:@"alter table %@ add column %@ %@", [self tableName], propName, colType]];
+                    [theDatabaseQueue inTransaction:^(FMDatabase *db, BOOL *rollback) {
+                        if (*rollback) {
+                            return ;
+                        }
+                        [db executeUpdate:[NSString stringWithFormat:@"alter table %@ add column %@ %@", [self tableName], propName, colType]];
+                     }];
+                    
+//                     [database executeUpdate:[NSString stringWithFormat:@"alter table %@ add column %@ %@", [self tableName], propName, colType]];
                 }
             }
             
         }
     }
     
-    [database close];
+//    [database close];
 }
 
 
@@ -378,9 +415,11 @@ NSMutableArray *checkedTables;
      [[self class] tableCheck];
     NSDictionary *props = [[self class] propertiesWithEncodedTypes];
  
-    FMDatabase *database = [[self class] database];
-    [database open];
-    [database beginTransaction];
+//    FMDatabase *database = [[self class] database];
+//    [database open];
+//    [database beginTransaction];
+    FMDatabaseQueue * theDatabaseQueue  = [[self class] databaseQueue];
+    
     
     NSMutableString *deleteQuery = [NSMutableString stringWithFormat:@"DELETE FROM %@ WHERE ", [[self class] tableName]];
     
@@ -481,12 +520,17 @@ NSMutableArray *checkedTables;
           index ++;
     }// for
  
-       NSLog(@" del *********  %@ - %@",deleteQuery,valueSQL);
-       BOOL ret = [database executeUpdate:deleteQuery withArgumentsInArray:valueArray];
-        NSLog(@" del *********  %d - %d",ret,ret);
-    [database commit];
-    [database close];
+//       NSLog(@" del *********  %@ - %@",deleteQuery,valueSQL);
+//       BOOL ret = [database executeUpdate:deleteQuery withArgumentsInArray:valueArray];
+//        NSLog(@" del *********  %d - %d",ret,ret);
+//    [database commit];
+//    [database close];
     
+    [theDatabaseQueue inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        NSLog(@" del *********  %@ - %@",deleteQuery,valueSQL);
+        BOOL ret = [db executeUpdate:deleteQuery withArgumentsInArray:valueArray];
+        NSLog(@" del *********  %d - %d",ret,ret);
+    }];
      alreadyDeleting = NO;
 }
 
@@ -501,10 +545,11 @@ NSMutableArray *checkedTables;
     NSDictionary *props = [[self class] propertiesWithEncodedTypes];
     NSArray *theTransients = [[self class] transients];
  
-    FMDatabase *database = [[self class] database];
-    [database open];
-    [database beginTransaction];
- 
+//    FMDatabase *database = [[self class] database];
+//    [database open];
+//    [database beginTransaction];
+    FMDatabaseQueue * theDatabaseQueue  = [[self class] databaseQueue];
+    
 //        if (pk < 0)
 //        {
 //              NSString *pkQuery = [NSString stringWithFormat:@"SELECT SEQ FROM SQLITESEQUENCE WHERE NAME='%@'", [[self class] tableName]];
@@ -617,11 +662,17 @@ NSMutableArray *checkedTables;
 
             }// for
     
-      NSLog(@" *********  %@ - %@",updateSQL,valueSQL);
-      BOOL ret = [database executeUpdate:updateSQL withArgumentsInArray:valueArray];
-      NSLog(@" *********  %d - %d",ret,ret);
-     [database commit];
-     [database close];
+//      NSLog(@" *********  %@ - %@",updateSQL,valueSQL);
+//      BOOL ret = [database executeUpdate:updateSQL withArgumentsInArray:valueArray];
+//      NSLog(@" *********  %d - %d",ret,ret);
+//     [database commit];
+//     [database close];
+    
+    [theDatabaseQueue inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        NSLog(@" *********  %@ - %@",updateSQL,valueSQL);
+        BOOL ret = [db executeUpdate:updateSQL withArgumentsInArray:valueArray];
+        NSLog(@" *********  %d - %d",ret,ret);
+    }];
     
      alreadySaving = NO;
 }

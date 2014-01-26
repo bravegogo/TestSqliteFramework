@@ -8,6 +8,9 @@
 
 #import "DatabaseInstanceManager.h"
 #import "FMDatabase.h"
+#import "FMDatabaseQueue.h"
+
+
 
 static DatabaseInstanceManager * databaseInstanceManager = nil;
 
@@ -20,6 +23,20 @@ static DatabaseInstanceManager * databaseInstanceManager = nil;
         }
     }
     return databaseInstanceManager;
+}
+- (id)init
+{
+    self = [super init];
+    if (self)
+    {
+        self.dbQueue = [ self getDatabaseQueue ];
+    }
+    return  self;
+}
+
+- (FMDatabaseQueue *) getDatabaseQueue{
+    self.dbQueue = [FMDatabaseQueue databaseQueueWithPath:[self getSqliteFilePath:[self getTheDatabaseName]]];
+    return self.dbQueue;
 }
 
 - (FMDatabase *) getDatabase{
@@ -45,7 +62,6 @@ static DatabaseInstanceManager * databaseInstanceManager = nil;
     NSString* path = [self getTheDatabaseName];
     NSFileManager* fm = [NSFileManager defaultManager];
     [fm removeItemAtPath:path error:NULL];
- 
 }
 /*
  
@@ -67,4 +83,6 @@ static DatabaseInstanceManager * databaseInstanceManager = nil;
     }
     return self.databaseName;
 }
+
+ 
 @end
