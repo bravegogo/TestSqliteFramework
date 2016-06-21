@@ -19,7 +19,13 @@
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
     
-    
+    /*
+     
+     test ---- test ---- test
+     
+     
+     
+     */
     
     Car * car = [[Car alloc]init];
     car.wheel = @"09099090";
